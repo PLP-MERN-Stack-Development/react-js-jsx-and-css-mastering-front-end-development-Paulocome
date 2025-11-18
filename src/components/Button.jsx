@@ -1,69 +1,122 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+ // src/App.jsx
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import Button from './components/Button';
 
-/**
- * Button component with different variants
- * @param {Object} props - Component props
- * @param {string} props.variant - Button variant (primary, secondary, danger)
- * @param {string} props.size - Button size (sm, md, lg)
- * @param {boolean} props.disabled - Whether the button is disabled
- * @param {function} props.onClick - Click handler function
- * @param {React.ReactNode} props.children - Button content
- * @returns {JSX.Element} - Button component
- */
-const Button = ({ 
-  variant = 'primary', 
-  size = 'md', 
-  disabled = false, 
-  onClick, 
-  children,
-  className = '',
-  ...rest 
-}) => {
-  // Base classes
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors';
-  
-  // Variant classes
-  const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800 focus:ring-gray-500',
-    danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500',
-    success: 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500',
-    warning: 'bg-yellow-500 hover:bg-yellow-600 text-white focus:ring-yellow-500',
+// Navbar Component
+const Navbar = ({ darkMode, toggleDarkMode }) => (
+  <header className="bg-white dark:bg-gray-800 shadow">
+    <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">PLP Task Manager</h1>
+      <Button variant="primary" size="md" onClick={toggleDarkMode}>
+        {darkMode ? 'Light Mode' : 'Dark Mode'}
+      </Button>
+    </div>
+  </header>
+);
+
+// Footer Component
+const Footer = () => (
+  <footer className="bg-white dark:bg-gray-800 shadow mt-auto">
+    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <p className="text-center text-gray-500 dark:text-gray-400">
+        © {new Date().getFullYear()} PLP Task Manager. All rights reserved.
+      </p>
+    </div>
+  </footer>
+);
+
+// Card Component
+const Card = ({ title, description }) => (
+  <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-4 hover:shadow-xl transition">
+    <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">{title}</h2>
+    <p className="text-gray-700 dark:text-gray-200">{description}</p>
+  </div>
+);
+
+// Simulated API fetch
+const fetchTasks = async () => [
+  { id: 1, title: 'Learn React', description: 'Study JSX and hooks' },
+  { id: 2, title: 'Build Project', description: 'Use Tailwind CSS for styling' },
+  { id: 3, title: 'Deploy App', description: 'Deploy to Netlify or Vercel' },
+];
+
+// TaskManager Component
+const TaskManager = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTasks().then((data) => {
+      setTasks(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleAddTask = () => {
+    const newTask = { id: tasks.length + 1, title: 'New Task', description: 'New task description' };
+    setTasks([newTask, ...tasks]);
   };
-  
-  // Size classes
-  const sizeClasses = {
-    sm: 'px-2 py-1 text-sm',
-    md: 'px-4 py-2',
-    lg: 'px-6 py-3 text-lg',
+
+  const handleDeleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
   };
-  
-  // Disabled classes
-  const disabledClasses = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
-  
-  // Combine all classes
-  const buttonClasses = `${baseClasses} ${variantClasses[variant] || variantClasses.primary} ${sizeClasses[size] || sizeClasses.md} ${disabledClasses} ${className}`;
-  
+
+  if (loading)
+    return <p className="text-center text-gray-500 dark:text-gray-300">Loading tasks...</p>;
+
   return (
-    <button
-      className={buttonClasses}
-      disabled={disabled}
-      onClick={onClick}
-      {...rest}
-    >
-      {children}
-    </button>
+    <div>
+      <div className="flex gap-2 mb-4">
+        <Button variant="success" size="sm" onClick={handleAddTask}>
+          Add Task
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tasks.map((task) => (
+          <div key={task.id} className="flex flex-col">
+            <Card title={task.title} description={task.description} />
+            <Button
+              variant="danger"
+              size="sm"
+              className="mt-2"
+              onClick={() => handleDeleteTask(task.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
-Button.propTypes = {
-  variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'success', 'warning']),
-  size: PropTypes.oneOf(['sm', 'md', 'lg']),
-  disabled: PropTypes.bool,
-  onClick: PropTypes.func,
-  children: PropTypes.node.isRequired,
-  className: PropTypes.string,
-};
+// App Component
+function App() {
+  const [darkMode, setDarkMode] = useState(false);
 
-export default Button; 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    if (!darkMode) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex flex-col bg-gray-100 text-gray-900 ${
+        darkMode ? 'dark bg-gray-900 text-gray-100' : ''
+      }`}
+    >
+      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+
+      <main className="flex-1 max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Your Tasks</h1>
+        <TaskManager />
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
