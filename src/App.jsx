@@ -1,72 +1,102 @@
-import { useState } from 'react';
+// src/App.jsx
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Import your components here
-// import Button from './components/Button';
-// import Navbar from './components/Navbar';
-// import Footer from './components/Footer';
-// import TaskManager from './components/TaskManager';
+// Components
+const Navbar = ({ darkMode, toggleDarkMode }) => {
+  return (
+    <header className="bg-white dark:bg-gray-800 shadow">
+      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">PLP Task Manager</h1>
+        <button
+          onClick={toggleDarkMode}
+          className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+        >
+          {darkMode ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </div>
+    </header>
+  );
+};
 
-function App() {
-  const [count, setCount] = useState(0);
+const Footer = () => {
+  return (
+    <footer className="bg-white dark:bg-gray-800 shadow mt-auto">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <p className="text-center text-gray-500 dark:text-gray-400">
+          © {new Date().getFullYear()} PLP Task Manager. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+};
+
+const Card = ({ title, description }) => {
+  return (
+    <div className="bg-white dark:bg-gray-700 shadow-md rounded-lg p-4 hover:shadow-xl transition">
+      <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">{title}</h2>
+      <p className="text-gray-700 dark:text-gray-200">{description}</p>
+    </div>
+  );
+};
+
+// Simulated API fetch
+const fetchTasks = async () => {
+  return [
+    { id: 1, title: 'Learn React', description: 'Study JSX and hooks' },
+    { id: 2, title: 'Build Project', description: 'Use Tailwind CSS for styling' },
+    { id: 3, title: 'Deploy App', description: 'Deploy to Netlify or Vercel' },
+  ];
+};
+
+const TaskManager = () => {
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTasks().then((data) => {
+      setTasks(data);
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <p className="text-center text-gray-500 dark:text-gray-300">Loading tasks...</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Navbar component will go here */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold">PLP Task Manager</h1>
-        </div>
-      </header>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {tasks.map((task) => (
+        <Card key={task.id} title={task.title} description={task.description} />
+      ))}
+    </div>
+  );
+};
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-6">
-          <div className="flex flex-col items-center justify-center">
-            <p className="text-lg mb-4">
-              Edit <code className="font-mono bg-gray-200 dark:bg-gray-700 p-1 rounded">src/App.jsx</code> and save to test HMR
-            </p>
-            
-            <div className="flex items-center gap-4 my-4">
-              <button
-                onClick={() => setCount((count) => count - 1)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-              >
-                -
-              </button>
-              <span className="text-xl font-bold">{count}</span>
-              <button
-                onClick={() => setCount((count) => count + 1)}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-              >
-                +
-              </button>
-            </div>
+function App() {
+  const [darkMode, setDarkMode] = useState(false);
 
-            <p className="text-gray-500 dark:text-gray-400 mt-4">
-              Implement your TaskManager component here
-            </p>
-          </div>
-        </div>
-        
-        {/* API data display will go here */}
-        <div className="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">API Data</h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Fetch and display data from an API here
-          </p>
-        </div>
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    if (!darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  return (
+    <div className={`min-h-screen flex flex-col bg-gray-100 text-gray-900 ${darkMode ? 'dark bg-gray-900 text-gray-100' : ''}`}>
+      <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+
+      <main className="flex-1 max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Your Tasks</h1>
+        <TaskManager />
       </main>
 
-      {/* Footer component will go here */}
-      <footer className="bg-white dark:bg-gray-800 shadow mt-auto">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 dark:text-gray-400">
-            © {new Date().getFullYear()} PLP Task Manager. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
 
-export default App; 
+export default App;
+
+  
